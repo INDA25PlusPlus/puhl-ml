@@ -1,9 +1,14 @@
-use nalgebra::{SMatrix, SVector};
-
+use nalgebra::SVector;
 use super::layer::Layer;
 
 pub struct ReLU<const I: usize> {
     last_input: Option<SVector<f64, I>>,
+}
+
+impl<const I: usize> ReLU<I> {
+    pub fn new() -> Self {
+        Self { last_input: None }
+    }
 }
 
 impl<const I: usize> Layer for ReLU<I> {
