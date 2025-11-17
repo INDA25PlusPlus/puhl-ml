@@ -7,4 +7,5 @@ pub trait ParamVisitor {
 
 pub trait Parameterized {
     fn visit_params<V: ParamVisitor>(&mut self, visitor: &mut V);
+    fn zero_grad(&mut self);
 }

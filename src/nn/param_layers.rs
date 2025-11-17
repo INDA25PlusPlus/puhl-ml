@@ -2,6 +2,7 @@ use nalgebra::{SMatrix, SVector};
 use super::layer::Layer;
 use super::visitor::{ParamVisitor, Parameterized};
 
+/* ======================== LinearLayer ======================== */
 pub struct LinearLayer<const I: usize, const O: usize> {
     pub weights: SMatrix<f64, O, I>,
     pub bias: SVector<f64, O>,
@@ -21,11 +22,6 @@ impl<const I: usize, const O: usize> LinearLayer<I, O> {
             bias_grad: SVector::zeros(),
             last_input: None,
         }
-    }
-
-    pub fn zero_grad(&mut self) {
-        self.weight_grad.fill(0.0);
-        self.bias_grad.fill(0.0);
     }
 }
 
@@ -53,5 +49,10 @@ impl<const I: usize, const O: usize> Parameterized for LinearLayer<I, O> {
     fn visit_params<V: ParamVisitor>(&mut self, visitor: &mut V) {
         visitor.visit_matrix(&mut self.weights);
         visitor.visit_vector(&mut self.bias);
+    }
+
+    fn zero_grad(&mut self) {
+        self.weight_grad.fill(0.0);
+        self.bias_grad.fill(0.0);
     }
 }
