@@ -1,5 +1,3 @@
-use super::visitor::ParamVisitor;
-
 pub trait Layer {
     type Input;
     type Output;
