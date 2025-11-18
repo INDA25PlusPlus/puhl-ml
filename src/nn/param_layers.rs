@@ -47,8 +47,8 @@ impl<const I: usize, const O: usize> Layer for LinearLayer<I, O> {
 
 impl<const I: usize, const O: usize> Parameterized for LinearLayer<I, O> {
     fn visit_params<V: ParamVisitor>(&mut self, visitor: &mut V) {
-        visitor.visit_matrix(&mut self.weights);
-        visitor.visit_vector(&mut self.bias);
+        visitor.visit_matrix_with_grad(&mut self.weights, &self.weight_grad);
+        visitor.visit_vector_with_grad(&mut self.bias, &self.bias_grad);
     }
 
     fn zero_grad(&mut self) {
