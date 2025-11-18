@@ -1,6 +1,6 @@
 use nalgebra::{SMatrix, SVector};
-use super::layer::Layer;
-use super::visitor::{ParamVisitor, Parameterized};
+use crate::layer::Layer;
+use crate::visitor::{ParamVisitor, Parameterized};
 
 pub struct LinearLayer<const B: usize, const I: usize, const O: usize> {
     pub weights: SMatrix<f64, O, I>,

@@ -1,5 +1,5 @@
 use nalgebra::{SMatrix};
-use super::layer::Layer;
+use crate::layer::Layer;
 
 pub struct ReLU<const B: usize, const I: usize> {
     last_input: Option<SMatrix<f64, I, B>>,

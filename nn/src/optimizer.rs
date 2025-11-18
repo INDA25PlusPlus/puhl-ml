@@ -1,4 +1,4 @@
-use crate::nn::visitor::ParamVisitor;
+use crate::visitor::ParamVisitor;
 
 pub struct SGD {
     pub learning_rate: f64,
