@@ -1,16 +1,16 @@
-use nalgebra::{SMatrix, SVector};
+use ndarray::{Array1, Array2};
 
 pub trait ParamVisitor {
-    fn visit_matrix_with_grad<const R: usize, const C: usize>(
+    fn visit_array2_with_grad(
         &mut self,
-        param: &mut SMatrix<f64, R, C>,
-        grad: &SMatrix<f64, R, C>,
+        param: &mut Array2<f64>,
+        grad: &Array2<f64>,
     );
 
-    fn visit_vector_with_grad<const N: usize>(
+    fn visit_array1_with_grad(
         &mut self,
-        param: &mut SVector<f64, N>,
-        grad: &SVector<f64, N>,
+        param: &mut Array1<f64>,
+        grad: &Array1<f64>,
     );
 }
 

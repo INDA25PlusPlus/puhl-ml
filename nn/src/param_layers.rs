@@ -1,53 +1,56 @@
-use nalgebra::{SMatrix, SVector};
+use ndarray::{Array1, Array2, Axis};
 use crate::layer::Layer;
 use crate::visitor::{ParamVisitor, Parameterized};
 
-pub struct LinearLayer<const B: usize, const I: usize, const O: usize> {
-    pub weights: SMatrix<f64, O, I>,
-    pub bias: SVector<f64, O>,
+pub struct LinearLayer {
+    pub weights: Array2<f64>,  // Shape: (output_features, input_features)
+    pub bias: Array1<f64>,      // Shape: (output_features,)
 
-    pub weight_grad: SMatrix<f64, O, I>,
-    pub bias_grad: SVector<f64, O>,
+    pub weight_grad: Array2<f64>,
+    pub bias_grad: Array1<f64>,
 
-    last_input: Option<SMatrix<f64, I, B>>,
+    last_input: Option<Array2<f64>>,
 }
 
-impl<const B: usize, const I: usize, const O: usize> LinearLayer<B, I, O> {
-    pub fn new(weights: SMatrix<f64, O, I>, bias: SVector<f64, O>) -> Self {
+impl LinearLayer {
+    pub fn new(output_features: usize, input_features: usize) -> Self {
         Self {
-            weights,
-            bias,
-            weight_grad: SMatrix::zeros(),
-            bias_grad: SVector::zeros(),
+            weights: Array2::zeros((output_features, input_features)),
+            bias: Array1::zeros(output_features),
+            weight_grad: Array2::zeros((output_features, input_features)),
+            bias_grad: Array1::zeros(output_features),
             last_input: None,
         }
     }
 }
 
-impl<const B: usize, const I: usize, const O: usize> Layer for LinearLayer<B, I, O> {
-    type Input = SMatrix<f64, I, B>;
-    type Output = SMatrix<f64, O, B>;
+impl Layer for LinearLayer {
+    type Input = Array2<f64>;   // Shape: (input_features, batch_size)
+    type Output = Array2<f64>;  // Shape: (output_features, batch_size)
 
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
-        self.last_input = Some(*input);
-        &self.weights * input + (&self.bias * SVector::<f64, B>::repeat(1.0).transpose())
+        self.last_input = Some(input.clone());
+
+        let output = self.weights.dot(input);
+        &output + &self.bias.view().insert_axis(Axis(1))
     }
 
     fn backward(&mut self, grad_output: &Self::Output) -> Self::Input {
         let input = self.last_input.as_ref()
             .expect("forward() must be called before backward()");
 
-        self.weight_grad += (grad_output * input.transpose()) / B as f64;
-        self.bias_grad += (grad_output * SVector::<f64, B>::repeat(1.0)) / B as f64;
+        let batch_size = input.shape()[1] as f64;
 
-        self.weights.transpose() * grad_output
+        self.weight_grad = grad_output.dot(&input.t()) / batch_size;
+        self.bias_grad = grad_output.sum_axis(Axis(1)) / batch_size;
+        self.weights.t().dot(grad_output)
     }
 }
 
-impl<const B: usize, const I: usize, const O: usize> Parameterized for LinearLayer<B, I, O> {
+impl Parameterized for LinearLayer {
     fn visit_params<V: ParamVisitor>(&mut self, visitor: &mut V) {
-        visitor.visit_matrix_with_grad(&mut self.weights, &self.weight_grad);
-        visitor.visit_vector_with_grad(&mut self.bias, &self.bias_grad);
+        visitor.visit_array2_with_grad(&mut self.weights, &self.weight_grad);
+        visitor.visit_array1_with_grad(&mut self.bias, &self.bias_grad);
     }
 
     fn zero_grad(&mut self) {

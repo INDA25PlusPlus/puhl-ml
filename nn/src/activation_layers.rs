@@ -1,31 +1,29 @@
-use nalgebra::{SMatrix};
+use ndarray::Array2;
 use crate::layer::Layer;
 
-pub struct ReLU<const B: usize, const I: usize> {
-    last_input: Option<SMatrix<f64, I, B>>,
+pub struct ReLU {
+    last_input: Option<Array2<f64>>,
 }
 
-impl<const B: usize, const I: usize> ReLU<B, I> {
+impl ReLU {
     pub fn new() -> Self {
         Self { last_input: None }
     }
 }
 
-impl<const B: usize, const I: usize> Layer for ReLU<B, I> {
-    type Input = SMatrix<f64, I, B>;
-    type Output = SMatrix<f64, I, B>;
+impl Layer for ReLU {
+    type Input = Array2<f64>;
+    type Output = Array2<f64>;
 
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
-        self.last_input = Some(*input);
-        input.map(|x| x.max(0.0))
+        self.last_input = Some(input.clone());
+        input.mapv(|x| x.max(0.0))
     }
 
     fn backward(&mut self, grad_output: &Self::Output) -> Self::Input {
         let input = self.last_input.as_ref()
             .expect("forward() must be called before backward()");
 
-        grad_output.zip_map(input, |grad, x| {
-            if x > 0.0 { grad } else { 0.0 }
-        })
+        grad_output * &input.mapv(|x| if x > 0.0 { 1.0 } else { 0.0 })
     }
 }

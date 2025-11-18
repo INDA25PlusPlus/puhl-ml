@@ -1,3 +1,4 @@
+use ndarray::{Array1, Array2};
 use crate::visitor::ParamVisitor;
 
 pub struct SGD {
@@ -11,19 +12,19 @@ impl SGD {
 }
 
 impl ParamVisitor for SGD {
-    fn visit_matrix_with_grad<const R: usize, const C: usize>(
-            &mut self,
-            param: &mut nalgebra::SMatrix<f64, R, C>,
-            grad: &nalgebra::SMatrix<f64, R, C>,
-        ) {
-        *param -= grad * self.learning_rate;
+    fn visit_array2_with_grad(
+        &mut self,
+        param: &mut Array2<f64>,
+        grad: &Array2<f64>,
+    ) {
+        *param = &*param - &(grad * self.learning_rate);
     }
 
-    fn visit_vector_with_grad<const N: usize>(
-            &mut self,
-            param: &mut nalgebra::SVector<f64, N>,
-            grad: &nalgebra::SVector<f64, N>,
-        ) {
-        *param -= grad * self.learning_rate;
+    fn visit_array1_with_grad(
+        &mut self,
+        param: &mut Array1<f64>,
+        grad: &Array1<f64>,
+    ) {
+        *param = &*param - &(grad * self.learning_rate);
     }
 }
