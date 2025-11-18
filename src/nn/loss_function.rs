@@ -1,16 +1,16 @@
-use nalgebra::SVector;
+use nalgebra::{SMatrix};
 
-pub trait LossFunction<const N: usize> {
-    fn forward(&mut self, prediction: &SVector<f64, N>, target: &SVector<f64, N>) -> f64;
-    fn backward(&self) -> SVector<f64, N>;
+pub trait LossFunction<const B: usize, const N: usize> {
+    fn forward(&mut self, prediction: &SMatrix<f64, N, B>, target: &SMatrix<f64, N, B>) -> f64;
+    fn backward(&self) -> SMatrix<f64, N, B>;
 }
 
-pub struct MSE<const N: usize> {
-    last_prediction: Option<SVector<f64, N>>,
-    last_target: Option<SVector<f64, N>>,
+pub struct MSE<const B: usize, const N: usize> {
+    last_prediction: Option<SMatrix<f64, N, B>>,
+    last_target: Option<SMatrix<f64, N, B>>,
 }
 
-impl<const N: usize> MSE<N> {
+impl<const B: usize, const N: usize> MSE<B, N> {
     pub fn new() -> Self {
         Self {
             last_prediction: None,
@@ -19,22 +19,22 @@ impl<const N: usize> MSE<N> {
     }
 }
 
-impl<const N: usize> LossFunction<N> for MSE<N> {
-    fn forward(&mut self, prediction: &SVector<f64, N>, target: &SVector<f64, N>) -> f64 {
+impl<const B: usize, const N: usize> LossFunction<B, N> for MSE<B, N> {
+    fn forward(&mut self, prediction: &SMatrix<f64, N, B>, target: &SMatrix<f64, N, B>) -> f64 {
         self.last_prediction = Some(*prediction);
         self.last_target = Some(*target);
 
         let diff = prediction - target;
 
-        diff.norm_squared() / N as f64
+        diff.norm_squared() / (N * B) as f64
     }
 
-    fn backward(&self) -> SVector<f64, N> {
+    fn backward(&self) -> SMatrix<f64, N, B> {
         let prediction = self.last_prediction.as_ref()
             .expect("forward() must be called before backward()");
         let target = self.last_target.as_ref()
             .expect("forward() must be called before backward()");
 
-        (2.0 / N as f64) * (prediction - target)
+        (2.0 / (N * B) as f64) * (prediction - target)
     }
 }
