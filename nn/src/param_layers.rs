@@ -41,8 +41,8 @@ impl Layer for LinearLayer {
 
         let batch_size = input.shape()[1] as f64;
 
-        self.weight_grad = grad_output.dot(&input.t()) / batch_size;
-        self.bias_grad = grad_output.sum_axis(Axis(1)) / batch_size;
+        self.weight_grad = grad_output.dot(&input.t());
+        self.bias_grad = grad_output.sum_axis(Axis(1));
         self.weights.t().dot(grad_output)
     }
 }
