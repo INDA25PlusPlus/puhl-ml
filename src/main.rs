@@ -14,14 +14,18 @@ struct NetworkBasic {
     pub layer1: LinearLayer,
     pub relu: ReLU,
     pub layer2: LinearLayer,
+    pub relu2: ReLU,
+    pub layer3: LinearLayer,
 }
 
 impl NetworkBasic {
     pub fn new() -> Self {
         Self {
-            layer1: LinearLayer::new(128, 784),
+            layer1: LinearLayer::new(800, 784),
             relu: ReLU::new(),
-            layer2: LinearLayer::new(10, 128),
+            layer2: LinearLayer::new(300, 800),
+            relu2: ReLU::new(),
+            layer3: LinearLayer::new(10, 300),
         }
     }
 }
@@ -33,11 +37,15 @@ impl Layer for NetworkBasic {
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
         let x = self.layer1.forward(input);
         let x = self.relu.forward(&x);
-        self.layer2.forward(&x)
+        let x = self.layer2.forward(&x);
+        let x = self.relu2.forward(&x);
+        self.layer3.forward(&x)
     }
 
     fn backward(&mut self, grad_output: &Self::Output) -> Self::Input {
-        let x = self.layer2.backward(grad_output);
+        let x = self.layer3.backward(grad_output);
+        let x = self.relu2.backward(&x);
+        let x = self.layer2.backward(&x);
         let x = self.relu.backward(&x);
         self.layer1.backward(&x)
     }
@@ -47,11 +55,13 @@ impl Parameterized for NetworkBasic {
     fn visit_params<V: ParamVisitor>(&mut self, visitor: &mut V) {
         self.layer1.visit_params(visitor);
         self.layer2.visit_params(visitor);
+        self.layer3.visit_params(visitor);
     }
 
     fn zero_grad(&mut self) {
         self.layer1.zero_grad();
         self.layer2.zero_grad();
+        self.layer3.zero_grad();
     }
 }
 
