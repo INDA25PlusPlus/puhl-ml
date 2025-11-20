@@ -1,7 +1,7 @@
 use mnist::*;
 use ndarray::prelude::*;
 use nn::{
-    Float, activation_layers::ReLU, layer::Layer, loss_function::{CrossEntropy, LossFunction}, optimizer::SGD, param_layers::LinearLayer, visitor::{ParamVisitor, Parameterized}
+    Float, activation_layers::ReLU, layer::Layer, loss_function::{CrossEntropy, LossFunction}, optimizer::{SGD, SGDMomentum}, param_layers::LinearLayer, visitor::{ParamVisitor, Parameterized}
 };
 
 // Uses simple linear layers, ReLU and MSE
@@ -106,7 +106,7 @@ fn train_network(
     learning_rate: Float,
 ) {
     let mut loss_fn = CrossEntropy::new();
-    let mut optimizer = SGD::new(learning_rate);
+    let mut optimizer = SGDMomentum::new(learning_rate, 0.9);
     let num_samples = train_images.shape()[1];
 
     println!("\nStarting training...");
@@ -134,6 +134,7 @@ fn train_network(
             network.backward(&grad);
 
             // Update weights
+            optimizer.start_pass();
             network.visit_params(&mut optimizer);
             network.zero_grad();
         }
