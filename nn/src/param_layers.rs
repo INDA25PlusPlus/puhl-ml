@@ -1,15 +1,16 @@
 use ndarray::{Array1, Array2, Axis};
 use crate::layer::Layer;
 use crate::visitor::{ParamVisitor, Parameterized};
+use crate::Float;
 
 pub struct LinearLayer {
-    pub weights: Array2<f64>,  // Shape: (output_features, input_features)
-    pub bias: Array1<f64>,      // Shape: (output_features,)
+    pub weights: Array2<Float>,  // Shape: (output_features, input_features)
+    pub bias: Array1<Float>,      // Shape: (output_features,)
 
-    pub weight_grad: Array2<f64>,
-    pub bias_grad: Array1<f64>,
+    pub weight_grad: Array2<Float>,
+    pub bias_grad: Array1<Float>,
 
-    last_input: Option<Array2<f64>>,
+    last_input: Option<Array2<Float>>,
 }
 
 impl LinearLayer {
@@ -25,8 +26,8 @@ impl LinearLayer {
 }
 
 impl Layer for LinearLayer {
-    type Input = Array2<f64>;   // Shape: (input_features, batch_size)
-    type Output = Array2<f64>;  // Shape: (output_features, batch_size)
+    type Input = Array2<Float>;   // Shape: (input_features, batch_size)
+    type Output = Array2<Float>;  // Shape: (output_features, batch_size)
 
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
         self.last_input = Some(input.clone());
@@ -65,23 +66,23 @@ mod tests {
     const O: usize = 3;
 
     struct ParamInitializer {
-        weight_lst: Array2<f64>,
-        bias_lst: Array1<f64>,
+        weight_lst: Array2<Float>,
+        bias_lst: Array1<Float>,
     }
 
     impl ParamVisitor for ParamInitializer {
         fn visit_array1_with_grad(
                 &mut self,
-                param: &mut Array1<f64>,
-                _grad: &Array1<f64>,
+                param: &mut Array1<Float>,
+                _grad: &Array1<Float>,
             ) {
             param.assign(&self.bias_lst);
         }
 
         fn visit_array2_with_grad(
                 &mut self,
-                param: &mut Array2<f64>,
-                _grad: &Array2<f64>,
+                param: &mut Array2<Float>,
+                _grad: &Array2<Float>,
             ) {
             param.assign(&self.weight_lst);
         }

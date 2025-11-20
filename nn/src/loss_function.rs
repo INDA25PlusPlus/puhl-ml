@@ -1,15 +1,14 @@
-use core::f64;
-
 use ndarray::{Array2, Axis};
+use crate::Float;
 
 pub trait LossFunction {
-    fn forward(&mut self, prediction: &Array2<f64>, target: &Array2<f64>) -> f64;
-    fn backward(&self) -> Array2<f64>;
+    fn forward(&mut self, prediction: &Array2<Float>, target: &Array2<Float>) -> Float;
+    fn backward(&self) -> Array2<Float>;
 }
 
 pub struct MSE {
-    last_prediction: Option<Array2<f64>>,
-    last_target: Option<Array2<f64>>,
+    last_prediction: Option<Array2<Float>>,
+    last_target: Option<Array2<Float>>,
 }
 
 impl MSE {
@@ -22,23 +21,23 @@ impl MSE {
 }
 
 impl LossFunction for MSE {
-    fn forward(&mut self, prediction: &Array2<f64>, target: &Array2<f64>) -> f64 {
+    fn forward(&mut self, prediction: &Array2<Float>, target: &Array2<Float>) -> Float {
         self.last_prediction = Some(prediction.clone());
         self.last_target = Some(target.clone());
 
         let diff = prediction - target;
-        let num_elements = (diff.shape()[0] * diff.shape()[1]) as f64;
+        let num_elements = (diff.shape()[0] * diff.shape()[1]) as Float;
 
         diff.mapv(|x| x * x).sum() / num_elements
     }
 
-    fn backward(&self) -> Array2<f64> {
+    fn backward(&self) -> Array2<Float> {
         let prediction = self.last_prediction.as_ref()
             .expect("forward() must be called before backward()");
         let target = self.last_target.as_ref()
             .expect("forward() must be called before backward()");
 
-        let num_elements = (prediction.shape()[0] * prediction.shape()[1]) as f64;
+        let num_elements = (prediction.shape()[0] * prediction.shape()[1]) as Float;
 
         (prediction - target) * (2.0 / num_elements)
     }
@@ -46,8 +45,8 @@ impl LossFunction for MSE {
 
 
 pub struct CrossEntropy {
-    last_probs: Option<Array2<f64>>,
-    last_target: Option<Array2<f64>>,
+    last_probs: Option<Array2<Float>>,
+    last_target: Option<Array2<Float>>,
 }
 
 impl CrossEntropy {
@@ -61,12 +60,12 @@ impl CrossEntropy {
 
 // Includes a Softmax layer
 impl LossFunction for CrossEntropy {
-    fn forward(&mut self, prediction: &Array2<f64>, target: &Array2<f64>) -> f64 {
-        let batch_size = prediction.shape()[1] as f64;
+    fn forward(&mut self, prediction: &Array2<Float>, target: &Array2<Float>) -> Float {
+        let batch_size = prediction.shape()[1] as Float;
 
         // Gives the max value of each vector prediction of each batch
         let max_prediction = prediction.map_axis(Axis(0), |col| {
-            col.fold(f64::NEG_INFINITY, |a, &b| a.max(b))
+            col.fold(Float::NEG_INFINITY, |a, &b| a.max(b))
         });
 
         // Keeps everything under 0 so exp doesn't explode in size
@@ -88,13 +87,13 @@ impl LossFunction for CrossEntropy {
         return total_loss / batch_size;
     }
 
-    fn backward(&self) -> Array2<f64> {
+    fn backward(&self) -> Array2<Float> {
         let probs = self.last_probs.as_ref()
             .expect("forward() must be called before backward()");
         let target = self.last_target.as_ref()
             .expect("forward() must be called before backward()");
 
-        let batch_size = probs.shape()[1] as f64;
+        let batch_size = probs.shape()[1] as Float;
 
         (probs - target) / batch_size
     }

@@ -5,3 +5,5 @@ pub mod visitor;
 pub mod param_layers;
 pub mod activation_layers;
 pub mod initializer;
+
+pub type Float = f32;

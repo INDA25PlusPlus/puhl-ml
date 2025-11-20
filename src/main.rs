@@ -1,12 +1,7 @@
 use mnist::*;
 use ndarray::prelude::*;
 use nn::{
-    activation_layers::ReLU,
-    layer::Layer,
-    param_layers::LinearLayer,
-    visitor::{ParamVisitor, Parameterized},
-    loss_function::{LossFunction, CrossEntropy},
-    optimizer::SGD,
+    Float, activation_layers::ReLU, layer::Layer, loss_function::{CrossEntropy, LossFunction}, optimizer::SGD, param_layers::LinearLayer, visitor::{ParamVisitor, Parameterized}
 };
 
 // Uses simple linear layers, ReLU and MSE
@@ -31,8 +26,8 @@ impl NetworkBasic {
 }
 
 impl Layer for NetworkBasic {
-    type Input = Array2<f64>;
-    type Output = Array2<f64>;
+    type Input = Array2<Float>;
+    type Output = Array2<Float>;
 
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
         let x = self.layer1.forward(input);
@@ -66,7 +61,7 @@ impl Parameterized for NetworkBasic {
 }
 
 // Might come in handy later
-fn _print_digit(image: ArrayView2<f32>, label: u8) {
+fn _print_digit(image: ArrayView2<Float>, label: u8) {
     println!("\n=== Digit: {} ===\n", label);
 
     // Display using ASCII characters based on pixel intensity
@@ -91,7 +86,7 @@ fn _print_digit(image: ArrayView2<f32>, label: u8) {
     println!();
 }
 
-fn one_hot_encode(labels: &[u8], num_classes: usize) -> Array2<f64> {
+fn one_hot_encode(labels: &[u8], num_classes: usize) -> Array2<Float> {
     let n = labels.len();
     let mut encoded = Array2::zeros((num_classes, n));
     for (i, &label) in labels.iter().enumerate() {
@@ -102,13 +97,13 @@ fn one_hot_encode(labels: &[u8], num_classes: usize) -> Array2<f64> {
 
 fn train_network(
     network: &mut NetworkBasic,
-    train_images: &Array2<f64>,
-    train_labels: &Array2<f64>,
-    test_images: &Array2<f64>,
+    train_images: &Array2<Float>,
+    train_labels: &Array2<Float>,
+    test_images: &Array2<Float>,
     test_labels: &[u8],
     epochs: usize,
     batch_size: usize,
-    learning_rate: f64,
+    learning_rate: Float,
 ) {
     let mut loss_fn = CrossEntropy::new();
     let mut optimizer = SGD::new(learning_rate);
@@ -143,7 +138,7 @@ fn train_network(
             network.zero_grad();
         }
 
-        let avg_loss = total_loss / num_batches as f64;
+        let avg_loss = total_loss / num_batches as Float;
 
         // Calculate accuracy every epoch
         let accuracy = calculate_accuracy(network, test_images, test_labels);
@@ -157,9 +152,9 @@ fn train_network(
 
 fn calculate_accuracy(
     network: &mut NetworkBasic,
-    test_images: &Array2<f64>,
+    test_images: &Array2<Float>,
     test_labels: &[u8],
-) -> f64 {
+) -> Float {
     let output = network.forward(test_images);
     let predictions = output.map_axis(Axis(0), |col| {
         col.iter()
@@ -174,7 +169,7 @@ fn calculate_accuracy(
         .filter(|(pred, actual)| pred == actual)
         .count();
 
-    correct as f64 / test_labels.len() as f64
+    correct as Float / test_labels.len() as Float
 }
 
 fn main() {
@@ -191,13 +186,13 @@ fn main() {
         .test_set_length(10_000)
         .finalize();
 
-    let train_images_flat: Vec<f64> = trn_img.iter().map(|&x| x as f64 / 256.0).collect();
+    let train_images_flat: Vec<Float> = trn_img.iter().map(|&x| x as Float / 256.0).collect();
     let train_images = Array2::from_shape_vec((50_000, 784), train_images_flat)
         .expect("Error converting training images to Array2")
         .t()
         .to_owned();
 
-    let test_images_flat: Vec<f64> = tst_img.iter().map(|&x| x as f64 / 256.0).collect();
+    let test_images_flat: Vec<Float> = tst_img.iter().map(|&x| x as Float / 256.0).collect();
     let test_images = Array2::from_shape_vec((10_000, 784), test_images_flat)
         .expect("Error converting test images to Array2")
         .t()

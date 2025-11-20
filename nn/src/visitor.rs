@@ -1,16 +1,17 @@
 use ndarray::{Array1, Array2};
+use crate::Float;
 
 pub trait ParamVisitor {
     fn visit_array2_with_grad(
         &mut self,
-        param: &mut Array2<f64>,
-        grad: &Array2<f64>,
+        param: &mut Array2<Float>,
+        grad: &Array2<Float>,
     );
 
     fn visit_array1_with_grad(
         &mut self,
-        param: &mut Array1<f64>,
-        grad: &Array1<f64>,
+        param: &mut Array1<Float>,
+        grad: &Array1<Float>,
     );
 }
 

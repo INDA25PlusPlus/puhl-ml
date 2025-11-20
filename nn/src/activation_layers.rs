@@ -1,8 +1,9 @@
 use ndarray::Array2;
 use crate::layer::Layer;
+use crate::Float;
 
 pub struct ReLU {
-    last_input: Option<Array2<f64>>,
+    last_input: Option<Array2<Float>>,
 }
 
 impl ReLU {
@@ -12,8 +13,8 @@ impl ReLU {
 }
 
 impl Layer for ReLU {
-    type Input = Array2<f64>;
-    type Output = Array2<f64>;
+    type Input = Array2<Float>;
+    type Output = Array2<Float>;
 
     fn forward(&mut self, input: &Self::Input) -> Self::Output {
         self.last_input = Some(input.clone());
