@@ -39,8 +39,6 @@ impl Layer for LinearLayer {
         let input = self.last_input.as_ref()
             .expect("forward() must be called before backward()");
 
-        let batch_size = input.shape()[1] as f64;
-
         self.weight_grad = grad_output.dot(&input.t());
         self.bias_grad = grad_output.sum_axis(Axis(1));
         self.weights.t().dot(grad_output)

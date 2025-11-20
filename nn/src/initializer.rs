@@ -1,6 +1,5 @@
 use ndarray::{Array1, Array2};
 use crate::visitor::ParamVisitor;
-use rand::Rng;
 use rand_distr::{Distribution, Normal};
 
 pub struct XavierInitializer {

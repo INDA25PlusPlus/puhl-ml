@@ -56,7 +56,7 @@ impl Parameterized for NetworkBasic {
 }
 
 // Might come in handy later
-fn print_digit(image: ArrayView2<f32>, label: u8) {
+fn _print_digit(image: ArrayView2<f32>, label: u8) {
     println!("\n=== Digit: {} ===\n", label);
 
     // Display using ASCII characters based on pixel intensity
