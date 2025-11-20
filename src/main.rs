@@ -5,7 +5,7 @@ use nn::{
     layer::Layer,
     param_layers::LinearLayer,
     visitor::{ParamVisitor, Parameterized},
-    loss_function::{LossFunction, MSE},
+    loss_function::{LossFunction, CrossEntropy},
     optimizer::SGD,
 };
 
@@ -100,7 +100,7 @@ fn train_network(
     batch_size: usize,
     learning_rate: f64,
 ) {
-    let mut loss_fn = MSE::new();
+    let mut loss_fn = CrossEntropy::new();
     let mut optimizer = SGD::new(learning_rate);
     let num_samples = train_images.shape()[1];
 
