@@ -15,4 +15,4 @@ $ cargo run --release
 ```
 
 ## Credit
-Architectures based on them written at [https://yann.lecun.org/exdb/mnist/]
+Architectures based on them written at https://yann.lecun.org/exdb/mnist/
